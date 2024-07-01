@@ -67,11 +67,9 @@ createInertiaApp({
             siteKey: captcheKey,
             loaderOptions: { useRecaptchaNet: true },
         });
-        if (process.env.NODE_ENV === "production") {
-            app.use(VueGtag, {
-                config: { id: "G-NXF32MLCHQ" },
-            });
-        }
+        app.use(VueGtag, {
+            config: { id: "G-NXF32MLCHQ" },
+        });
         app.mount(el);
     },
 
