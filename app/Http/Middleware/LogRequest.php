@@ -23,7 +23,6 @@ class LogRequest
        $response = $next($request);
 
        try {
-        Log::info($request);
            Event::create([
                'type' => 'pageview',
                'attribute' => $request->path(),
