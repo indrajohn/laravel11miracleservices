@@ -1,0 +1,105 @@
+on:
+  push:
+    branches:
+      - master
+name: CI -> Deploy to My website
+jobs:
+  web_deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get Latest Code
+        uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.2
+          extensions: mbstring, xml, ctype, json, curl, zip
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+          
+      - name: Install Composer dependencies
+        run: composer install
+
+      - name: Install Front end dependencies
+        run: npm install
+
+      - name: Install sshpass
+        run: sudo apt-get install -y sshpass
+
+      - name: Build Front End Dependencies
+        env:
+          NODE_ENV: production
+        run: npm run build
+        
+      - name: Remove Excluded Files
+        run: |
+          rm -rf ./node_modules
+          rm -rf ./.git
+          rm -rf ./.env
+          rm -rf ./vendor
+  
+      - name: Remove Files Except .env
+        env:
+          SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
+          SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
+          SSH_USERNAME: ${{ secrets.SSH_USERNAME }}
+        run: |
+          sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no $SSH_USERNAME@$SSH_KNOWN_HOSTS "cd /home/gbimssydney/domains/gbimssydney.org.au/LaravelRoot && find . -mindepth 1 -maxdepth 1 ! -name '.env' -exec rm -rf {} +"
+
+      - name: Upload from public_html via FTP
+        uses: airvzxf/ftp-deployment-action@latest
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          user: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local_dir: "./"
+          remote_dir: "./LaravelRoot"
+          
+      - name: Install Composer and Run Composer
+        env:
+          SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
+          SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
+          SSH_USERNAME: ${{ secrets.SSH_USERNAME }}
+        run: |
+          sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no $SSH_USERNAME@$SSH_KNOWN_HOSTS << 'EOF'
+            cd /home/gbimssydney/domains/gbimssydney.org.au/LaravelRoot
+            php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+            php -r "if (hash_file('sha384', 'composer-setup.php') === 'dac665fdc30fdd8ec78b38b9800061b4150413ff2e3b6f88543c636f7cd84f6db9189d43a81e5503cda447da73c7e5b6') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); } echo PHP_EOL;"
+            php composer-setup.php
+            php -r "unlink('composer-setup.php');"
+            ./composer.phar install
+          EOF
+          
+      - name: Remove All Files in public Except manifest.json
+        env:
+          SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
+          SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
+          SSH_USERNAME: ${{ secrets.SSH_USERNAME }}
+        run: |
+          sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no $SSH_USERNAME@$SSH_KNOWN_HOSTS << 'EOF'
+            PUBLIC_HTML_DIR="/home/gbimssydney/domains/gbimssydney.org.au/public_html"
+            LARAVEL_PUBLIC_DIR="/home/gbimssydney/domains/gbimssydney.org.au/LaravelRoot/public"
+            BUILD_DIR="$LARAVEL_PUBLIC_DIR/build"
+      
+            cd $PUBLIC_HTML_DIR
+            find . -mindepth 1 ! -name 'index.php' -exec rm -rf {} +
+      
+            if [ -d "$LARAVEL_PUBLIC_DIR" ]; then
+              cd $LARAVEL_PUBLIC_DIR
+              find . -mindepth 1 -maxdepth 1 ! -name 'build' -exec mv {} $PUBLIC_HTML_DIR/ \;
+            else
+              echo "$LARAVEL_PUBLIC_DIR does not exist."
+            fi
+      
+            if [ -d "$BUILD_DIR" ]; then
+              cd $BUILD_DIR
+              find . -mindepth 1 ! -name 'manifest.json' -exec mv {} $PUBLIC_HTML_DIR/ \;
+            else
+              echo "$BUILD_DIR does not exist."
+            fi
+          EOF
