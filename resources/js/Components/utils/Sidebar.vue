@@ -30,6 +30,14 @@
                 </li>
                 <li class="mb-6">
                     <NavLink
+                        :href="route('blog.index')"
+                        :active="route().current('blog.index')"
+                    >
+                        Blog
+                    </NavLink>
+                </li>
+                <!-- <li class="mb-6">
+                    <NavLink
                         :href="route('profile.edit')"
                         :active="route().current('profile.edit')"
                     >
@@ -40,7 +48,7 @@
                     <NavLink :href="route('logout')" method="post" as="button">
                         Log Out
                     </NavLink>
-                </li>
+                </li> -->
             </ul>
         </nav>
     </div>

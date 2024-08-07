@@ -12,8 +12,9 @@ import NProgress from "nprogress";
 import GuestLayout from "./Layouts/GuestLayout.vue";
 import PrimeVue from "primevue/config";
 import Aura from "@primevue/themes/aura";
+import Lara from "../css/Lara";
+import "primeicons/primeicons.css";
 import { VueReCaptcha } from "vue-recaptcha-v3";
-import Button from "primevue/button";
 import VueGtag from "vue-gtag";
 AOS.init();
 let timeout = null;
@@ -57,10 +58,14 @@ createInertiaApp({
         const app = createApp({ render: () => h(App, props) })
             .use(plugin)
             .use(head)
+            // .use(PrimeVue, {
+            //     theme: {
+            //         preset: Lara,
+            //     },
+            // })
             .use(PrimeVue, {
-                theme: {
-                    preset: Aura,
-                },
+                unstyled: true,
+                pt: Lara,
             })
             .use(ZiggyVue);
         app.use(VueReCaptcha, {

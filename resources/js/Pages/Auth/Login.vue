@@ -61,7 +61,11 @@ const submit = () => {
                     </div>
 
                     <div class="mt-4">
-                        <InputLabel for="password" value="Password" />
+                        <InputLabel
+                            for="password"
+                            value="Password"
+                            class="text-gray-200"
+                        />
 
                         <TextInput
                             id="password"

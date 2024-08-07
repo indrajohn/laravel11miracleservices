@@ -44,16 +44,16 @@
                         Zoom
                     </h3>
                     <p class="text-md text-gray-600 mt-2">
-                        <span class="block">ID : 853 9373 8076</span>
-                        <span class="block">Pass : 070216</span>
+                        <span class="block">ID : 953 057 8734 </span>
+                        <span class="block">Pass : church</span>
                         <span class="block">or :</span>
                     </p>
                     <a
-                        href="https://us02web.zoom.us/j/85393738076?pwd=czhJNmdVWWpmaW5FcjZnOXNDT2xhdz09"
+                        href="https://us06web.zoom.us/j/9530578734?pwd=4Zn012T4O64BDC3AqzlHPZFaLXkLjw.1"
                         class="text-blue-500 hover:underline inline-block"
                         target="_blank"
                     >
-                        https://us02web.zoom.us/j/85393738076?pwd=czhJNmdVWWpmaW5FcjZnOXNDT2xhdz09
+                        https://us06web.zoom.us/j/9530578734?pwd=4Zn012T4O64BDC3AqzlHPZFaLXkLjw.1
                     </a>
                 </div>
             </div>
